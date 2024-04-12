@@ -43,11 +43,11 @@ def home():
     """List all available api routes"""
     return(f"Welcome to my Hawaii Weather Station API<br/>"
            f"Available Routes:<br/>"
-           f"/api/v1.0/precipitation<br/>"
-           f"/api/v1.0/stations<br/>"
-           f"/api/v1.0/tobs<br/>"
-           f"/api/v1.0/enterstartdate<br/>"
-           f"/api/v1.0/enterstartdate/enterenddate<br/>")
+           f"/api/v1.0/precipitation : precipitation analysis of the last 12 months of data<br/>"
+           f"/api/v1.0/stations : stations names<br/>"
+           f"/api/v1.0/tobs : the dates and temperature observations of the most-active station for the previous year of data<br/>"
+           f"/api/v1.0/start : returns a JSON list of the minimum temperature, the average temperature, and the maximum temperature for a specified start date<br/>"
+           f"/api/v1.0/start/end : returns a JSON list of the minimum temperature, the average temperature, and the maximum temperature for a specified start and end date range<br/>")
 
 @app.route("/api/v1.0/precipitation")
 # """JSONify results of precipitation analysis"""
