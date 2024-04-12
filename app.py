@@ -45,7 +45,9 @@ def home():
            f"Available Routes:<br/>"
            f"/api/v1.0/precipitation<br/>"
            f"/api/v1.0/stations<br/>"
-           f"/api/v1.0/tobs<br/>")
+           f"/api/v1.0/tobs<br/>"
+           f"/api/v1.0/enterstartdate<br/>"
+           f"/api/v1.0/enterstartdate/enterenddate<br/>")
 
 @app.route("/api/v1.0/precipitation")
 # """JSONify results of precipitation analysis"""
@@ -70,13 +72,14 @@ def prcp():
 @app.route("/api/v1.0/stations")
 # """JSONify stations"""
 def station():
-    all_stations = session.query(Station.station).distinct().all()
+    all_stations = session.query(Station.station, Station.name).distinct().all()
 
     #create dictionary for all stations
     all_stations_dict = []
     for row in all_stations:
         all_stations_dict.append({
-            "station": row.station
+            "station": row.station,
+            "name": row.name
         })
     
     return(jsonify(all_stations_dict))
@@ -106,23 +109,55 @@ def tobs():
     return(jsonify(most_active_dict))
 
 @app.route("/api/v1.0/<start>")
-def start_date (date):
-    # provide code for min, max, and avg of tobs for each date
+def start_date(start):
+
+    #get min, max, avg tobs based on start date
+    start_results = session.query(func.min(Measurement.tobs), func.max(Measurement.tobs), func.avg(Measurement.tobs)).\
+    filter(Measurement.date >= start).all()
+
+    #make dataframe for results
+    start_results_df = pd.DataFrame(start_results, columns=['tmin','tmax','tavg'])
+
+    #create empty dictionary to place key & values
+    start_results_dict = []
+
+    #enter info into dictionary
+    for index, row in start_results:
+        start_results_dict.append({
+            "tmin": row[0],
+            "tmax": row[1],
+            "tavg": row[2]
+        })
+
+    return(jsonify(start_results_dict))
+    # return jsonify({"error": f"Date {date} not found."}), 404
 
 
-    # code for if given that date
-    canonicalized = date.replace(" ", "").lower()
-    for each in justice_league_members:
-        search_term = character["superhero"].replace(" ", "").lower()
+@app.route("/api/v1.0/<start>/<end>")
+def start_end_date(start, end):
 
-        if search_term == canonicalized:
-            return jsonify(character)
+    #get min, max, avg tobs based on start date
+    start_end_results = session.query(func.min(Measurement.tobs), func.max(Measurement.tobs), func.avg(Measurement.tobs)).\
+    filter(Measurement.date >= start)/
+    filter(Measurement.date <= end).all()
 
-    return jsonify({"error": f"Character with superhero {superhero} not found."}), 404
+    #make dataframe for results
+    start_end_results_df = pd.DataFrame(start_end_results, columns=['tmin','tmax','tavg'])
 
+    #create empty dictionary to place key & values
+    start_end_results_dict = []
 
-# @app.route("/api/v1.0/<start>/<end>")
+    #enter info into dictionary
+    for index, row in start_end_results:
+        start_end_results_dict.append({
+            "tmin": row[0],
+            "tmax": row[1],
+            "tavg": row[2]
+        })
 
+    return(jsonify(start_end_results_dict))
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+session.close()
